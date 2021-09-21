@@ -1,4 +1,5 @@
 import discord
+import pafy 
 from discord.channel import VoiceChannel
 from discord.ext import commands
 
@@ -12,55 +13,50 @@ class music_cog(commands.Cog):
 
         self.music_queue = []
         self.vc = ""
-        self.YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
-        self.FFMPEG_OPTIONS = {
-            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+        
 
     def search_yt(self, item):
-        with YoutubeDL(self.YDL_OPTIONS) as ydl:
-            try:
-                info = ydl.extract_info("ytsearch:%s" %
-                                        item, download=False)['entries'][0]
-            except Exception:
-                return False
-
-        return {'source': info['formats'][0]['url'], 'title': info['title']}
+        video = pafy.new(item)
+        print(video.rating)
+        best = video.getbestaudio()
+        filename = best.download("./assets/songs")
+        return video.title
 
     def play_next(self):
         if len(self.music_queue) > 0:
             self.is_playing = True
 
             #get the first url
-            m_url = self.music_queue[0][0]['source']
+            nomeSong = self.music_queue[0]
 
             #remove the first element as you are currently playing it
             self.music_queue.pop(0)
 
-            self.vc.play(discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
+            self.vc.play(discord.FFmpegPCMAudio("./assets/songs/"+nomeSong+".m4a"))
         else:
             self.is_playing = False
 
 
-    async def play_music(self):
+    async def play_music(self, channel):
         if len(self.music_queue) > 0:
             self.is_playing = True
 
             #prendi l'url del primo
-            m_url = self.music_queue[0][0]['source']
+            nomeSong = self.music_queue[0]
 
 
             #  questo mi connette il bot al voicechannel corrente
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
-                self.vc = await self.music_queue[0][1].connect()
+                self.vc = await channel.connect()
             else : 
-                await self.vc.move_to(self.music_queue[0][1])
+                await self.vc.move_to(channel)
 
 
             
             self.music_queue.pop(0)
 
             self.vc.play(discord.FFmpegPCMAudio(
-                m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next()) #osservare il metodo play
+                "./assets/songs/"+nomeSong+".m4a")) #osservare il metodo play
         else:
             self.is_playing = False
 
@@ -68,6 +64,7 @@ class music_cog(commands.Cog):
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
         query = " ".join(args)
+        
 
         voiceChannel = ctx.author.voice.channel
 
@@ -75,15 +72,13 @@ class music_cog(commands.Cog):
             await ctx.send("Entra in un cazzo di canale fra!")
         else: 
             song = self.search_yt(query)
-            if type(song) == True: 
+            if type(song) is None: 
                 await ctx.send("Chicco mettime un link valido o ti pisto")
             else : 
                 await ctx.send("Provvederò a sburare un pochino di musica")
-                self.music_queue.append([song, voiceChannel])
-
+                self.music_queue.append(song)
                 if self.is_playing == False: 
-                    print("CHICCOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-                    await self.play_music()
+                    await self.play_music(voiceChannel)
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
