@@ -17,7 +17,7 @@ class music_cog(commands.Cog):
     def search_yt(self, item):
         video = pafy.new(item)
         print(video.rating)
-        best = video.getbestaudio()
+        best = video.getbest()
         filename = best.download("./assets/songs")
         return video.title
 
@@ -30,7 +30,7 @@ class music_cog(commands.Cog):
 
             # remove the first element as you are currently playing it
             self.music_queue.pop(0)
-
+            
             self.vc.play(discord.FFmpegPCMAudio(
                 executable="C:Ffmpeg/ffmpeg/bin/ffmpeg.exe", source='./assets/songs/'+nomeSong+'.webm'))
         else:
@@ -54,7 +54,7 @@ class music_cog(commands.Cog):
 
             # todo aggiugnere ffmpeg
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
-                         source='./assets/songs/'+nomeSong+'.webm'))  # osservare il metodo play
+                         source='./assets/songs/'+nomeSong+'.mp4'))   # osservare il metodo play
         else:
             self.is_playing = False
 
@@ -84,7 +84,9 @@ class music_cog(commands.Cog):
 
     @commands.command(name="stop", help="skippa la canzone bro")
     async def stop(self):
-        if self.vc != "" and self.vc:
-            self.vc.stop()
+        if self.is_playing == True : 
+            await self.vc.stop()
+        else : 
+            return
     
  
