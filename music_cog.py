@@ -2,6 +2,7 @@ import discord
 import pafy
 from discord.channel import VoiceChannel
 from discord.ext import commands
+import time
 
 from youtube_dl import YoutubeDL
 
@@ -21,20 +22,7 @@ class music_cog(commands.Cog):
         filename = best.download("./assets/songs")
         return video.title
 
-    def play_next(self):
-        if len(self.music_queue) > 0:
-            self.is_playing = True
-
-            # get the first url
-            nomeSong = self.music_queue[0]
-
-            # remove the first element as you are currently playing it
-            self.music_queue.pop(0)
-            
-            self.vc.play(discord.FFmpegPCMAudio(
-                executable="C:Ffmpeg/ffmpeg/bin/ffmpeg.exe", source='./assets/songs/'+nomeSong+'.webm'))
-        else:
-            self.is_playing = False
+    
 
     async def play_music(self, channel):
         if len(self.music_queue) > 0:
@@ -54,9 +42,19 @@ class music_cog(commands.Cog):
 
             # todo aggiugnere ffmpeg
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
-                         source='./assets/songs/'+nomeSong+'.mp4'))   # osservare il metodo play
+                         source='./assets/songs/'+nomeSong+'.mp4'))
+            print("Current Playing: "+nomeSong)   # osservare il metodo play
+
+            #mi contrtolla costantemente se una canzone è in playing
+            while self.vc.is_playing(): 
+                time.sleep(3)
+            #TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
+            self.play_music(channel)
+
         else:
             self.is_playing = False
+            if self.vc.is_connected() : 
+                self.vc.disconnect()
 
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
@@ -74,19 +72,19 @@ class music_cog(commands.Cog):
                 await ctx.send("Provvederò a sburare un pochino di musica")
                 self.music_queue.append(song)
                 if self.is_playing == False:
-                    await self.play_music(voiceChannel)
+                    self.play_music(voiceChannel)
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
         if self.vc != "" and self.vc:
             self.vc.stop()
-            await self.play_music()
+            print("Stoppato e skippato")
+            await self.play_music(self.vc.channel)
 
     @commands.command(name="stop", help="skippa la canzone bro")
     async def stop(self):
         if self.is_playing == True : 
-            await self.vc.stop()
-        else : 
-            return
+            print("Stoppa ziooo")
+            self.vc.stop()
     
  
