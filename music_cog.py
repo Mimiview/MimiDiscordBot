@@ -40,7 +40,6 @@ class music_cog(commands.Cog):
             
             self.music_queue.pop(0)
 
-            # todo aggiugnere ffmpeg
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
                          source='./assets/songs/'+nomeSong+'.mp4'))
             print("Current Playing: "+nomeSong)   # osservare il metodo play
@@ -72,7 +71,7 @@ class music_cog(commands.Cog):
                 await ctx.send("Provvederò a sburare un pochino di musica")
                 self.music_queue.append(song)
                 if self.is_playing == False:
-                    self.play_music(voiceChannel)
+                    await self.play_music(voiceChannel)
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
