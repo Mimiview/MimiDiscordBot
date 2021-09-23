@@ -41,7 +41,7 @@ class music_cog(commands.Cog):
                 'https://www.youtube.com/watch?v=V2mnB2gYEMs&ab_channel=Rondodasosa', download=True)
         return [meta.get('title', None)] #TODO back-end handling
 
-    async def play_music(self):
+    async def play_music(self,channel):
         if len(self.music_queue) > 0:
             self.is_playing = True
 
@@ -50,14 +50,14 @@ class music_cog(commands.Cog):
 
             #  questo mi connette il bot al voicechannel corrente
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
-                self.vc = await self.vc.connect()
+                self.vc = await channel.connect()
             else:
                 # TODO da vedere se si sposta o meno
-                await self.vc.move_to(self.vc)
+                await self.vc.move_to(channel)
 
             self.music_queue.pop(0)
 
-            #TODO vedere la lambda se funziona o meno e estudioia
+            #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
                          source='./assets/songs/'+nomeSong+'.mp4'))
             print("Current Playing: "+nomeSong)   # osservare il metodo play
@@ -66,7 +66,7 @@ class music_cog(commands.Cog):
             while self.vc.is_playing():
                 time.sleep(3)
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
-            self.play_music()
+            self.play_music(channel)
 
         else:
             self.is_playing = False
@@ -89,7 +89,7 @@ class music_cog(commands.Cog):
                 await ctx.send("Provvederò a sburare un pochino di musica")
                 self.music_queue.append(song)
                 if self.is_playing == False:
-                    self.play_music()
+                    self.play_music(voiceChannel)
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
