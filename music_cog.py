@@ -3,6 +3,7 @@ import pafy
 from discord.channel import VoiceChannel
 from discord.ext import commands
 import time
+import os
 
 from youtube_dl import YoutubeDL
 
@@ -40,7 +41,7 @@ class music_cog(commands.Cog):
             
             self.music_queue.pop(0)
 
-            self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
+            self.vc.play(discord.FFmpegPCMAudio(executable=os.getenv('FFMPEG_PATH'),
                          source='./assets/songs/'+nomeSong+'.mp4'))
             print("Current Playing: "+nomeSong)   # osservare il metodo play
 
