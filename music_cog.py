@@ -3,6 +3,7 @@ import pafy
 from discord.channel import VoiceChannel
 from discord.ext import commands
 import time
+import youtube_dl
 
 from youtube_dl import YoutubeDL
 
@@ -22,7 +23,18 @@ class music_cog(commands.Cog):
         filename = best.download("./assets/songs")
         return video.title
 
-    
+    def youtube_dl_search(self, item):
+        ydl_opts = {'format': 'bestaudio/best',
+                    'noplaylist': True,
+                    'postprocessors': [{ #TODO look up for the option documentation and also fot "ffprobe/avprobe and ffmpeg/avconv not found. Please install one."'s issue 
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192',
+                    }],
+                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            meta = ydl.extract_info(
+                'https://www.youtube.com/watch?v=ITc6xZJ60oY&ab_channel=LAW-Tutorials', download=True)
 
     async def play_music(self, channel):
         if len(self.music_queue) > 0:
@@ -37,7 +49,6 @@ class music_cog(commands.Cog):
             else:
                 await self.vc.move_to(channel)
 
-            
             self.music_queue.pop(0)
 
             # todo aggiugnere ffmpeg
@@ -45,15 +56,15 @@ class music_cog(commands.Cog):
                          source='./assets/songs/'+nomeSong+'.mp4'))
             print("Current Playing: "+nomeSong)   # osservare il metodo play
 
-            #mi contrtolla costantemente se una canzone è in playing
-            while self.vc.is_playing(): 
+            # mi contrtolla costantemente se una canzone è in playing
+            while self.vc.is_playing():
                 time.sleep(3)
-            #TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
+            # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
             self.play_music(channel)
 
         else:
             self.is_playing = False
-            if self.vc.is_connected() : 
+            if self.vc.is_connected():
                 self.vc.disconnect()
 
     @commands.command(name="play", help="Plays a selected song from youtube")
@@ -83,8 +94,6 @@ class music_cog(commands.Cog):
 
     @commands.command(name="stop", help="skippa la canzone bro")
     async def stop(self):
-        if self.is_playing == True : 
+        if self.is_playing == True:
             print("Stoppa ziooo")
             self.vc.stop()
-    
- 
