@@ -66,7 +66,7 @@ class music_cog(commands.Cog):
             while self.vc.is_playing():
                 time.sleep(3)
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
-            self.play_music(channel)
+            await self.play_music(channel)
 
         else:
             self.is_playing = False
@@ -89,7 +89,7 @@ class music_cog(commands.Cog):
                 await ctx.send("Provvederò a sburare un pochino di musica")
                 self.music_queue.append(song)
                 if self.is_playing == False:
-                    self.play_music(voiceChannel)
+                    await self.play_music(voiceChannel)
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
