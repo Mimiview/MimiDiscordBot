@@ -14,7 +14,7 @@ class music_cog(commands.Cog):
         self.is_playing = False
 
         self.music_queue = []
-        self.vc = ""
+        self.vc = ""  # voice channel
 
     def search_yt(self, item):
         video = pafy.new(item)
@@ -23,20 +23,25 @@ class music_cog(commands.Cog):
         filename = best.download("./assets/songs")
         return video.title
 
-    def youtube_dl_search(self, item):
+    def youtube_dl_search():
         ydl_opts = {'format': 'bestaudio/best',
+                    # if they setn a playlist it would not consider it? #TODO study the behaviour
                     'noplaylist': True,
-                    'postprocessors': [{ #TODO look up for the option documentation and also fot "ffprobe/avprobe and ffmpeg/avconv not found. Please install one."'s issue 
+                    # location where ffmep is situated
+                    'ffmpeg_location': 'C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe',
+                    'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
-                        'preferredquality': '192',
+                        'preferredquality': '128',
                     }],
-                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}
+                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path
+
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(
-                'https://www.youtube.com/watch?v=ITc6xZJ60oY&ab_channel=LAW-Tutorials', download=True)
+                'https://www.youtube.com/watch?v=V2mnB2gYEMs&ab_channel=Rondodasosa', download=True)
+        return [meta.get('title', None)] #TODO back-end handling
 
-    async def play_music(self, channel):
+    async def play_music(self):
         if len(self.music_queue) > 0:
             self.is_playing = True
 
@@ -45,13 +50,14 @@ class music_cog(commands.Cog):
 
             #  questo mi connette il bot al voicechannel corrente
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
-                self.vc = await channel.connect()
+                self.vc = await self.vc.connect()
             else:
-                await self.vc.move_to(channel)
+                # TODO da vedere se si sposta o meno
+                await self.vc.move_to(self.vc)
 
             self.music_queue.pop(0)
 
-            # todo aggiugnere ffmpeg
+            #TODO vedere la lambda se funziona o meno e estudioia
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
                          source='./assets/songs/'+nomeSong+'.mp4'))
             print("Current Playing: "+nomeSong)   # osservare il metodo play
@@ -60,7 +66,7 @@ class music_cog(commands.Cog):
             while self.vc.is_playing():
                 time.sleep(3)
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
-            self.play_music(channel)
+            self.play_music()
 
         else:
             self.is_playing = False
@@ -83,7 +89,7 @@ class music_cog(commands.Cog):
                 await ctx.send("Provvederò a sburare un pochino di musica")
                 self.music_queue.append(song)
                 if self.is_playing == False:
-                    self.play_music(voiceChannel)
+                    self.play_music()
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
