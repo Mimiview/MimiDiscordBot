@@ -4,9 +4,14 @@ from discord.channel import VoiceChannel
 from discord.ext import commands
 import time
 import youtube_dl
+import os
+from dotenv import load_dotenv
 
 from youtube_dl import YoutubeDL
 #Ricorda di installare PyNaCl
+
+load_dotenv('.env')
+
 
 class music_cog(commands.Cog):
     def __init__(self, bot):
@@ -28,7 +33,7 @@ class music_cog(commands.Cog):
                     # if they setn a playlist it would not consider it? #TODO study the behaviour
                     'noplaylist': True,
                     # location where ffmep is situated
-                    'ffmpeg_location': 'C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe',
+                    'ffmpeg_location': os.getenv('FFMPEG_PATH'),
                     #'default_search' : 'auto', #TODO osservare come cercare senza url
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
@@ -63,7 +68,7 @@ class music_cog(commands.Cog):
 
             print('Poppato dalla lista'+self.music_queue.pop(0))
             #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
-            self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
+            self.vc.play(discord.FFmpegPCMAudio(executable=os.getenv('FFMPEG_PATH'),
                          source='./assets/songs/'+nomeSong+'.mp3'))
                # osservare il metodo play
 
