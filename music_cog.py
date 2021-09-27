@@ -72,8 +72,8 @@ class music_cog(commands.Cog):
                 print("Current Playing: "+nomeSong)
             else : 
                 print("Non playa più la song: "+nomeSong)
-            # mi contrtolla costantemente se una canzone è in playing
-            
+
+      
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
             
 
@@ -83,11 +83,14 @@ class music_cog(commands.Cog):
     async def play(self, ctx, *args):
         query = " ".join(args)
 
-        voiceChannel = ctx.author.voice.channel
-
-        if voiceChannel is None:
+        try : 
+            voiceChannel = ctx.author.voice.channel
+        except : 
             await ctx.send("Entra in un cazzo di canale fra!")
             return
+
+        
+            
         if self.is_playing == False :
             try :
                 song = self.youtube_dl_search(query)[0]
@@ -95,27 +98,22 @@ class music_cog(commands.Cog):
                 await ctx.send("Chicco mettime un link valido o ti pisto")
                 return
 
-            if type(song) is None:
-                print(type(song)+"HGWOEOWOEOOEOWEOEOWOEO")
-                await ctx.send("Chicco mettime un link valido o ti pisto")
-                return
-            else:
-                await ctx.send("Pompo un pochino di "+song)
-                self.music_queue.append(song)
+            await ctx.send("Pompo un pochino di "+song)
+            self.music_queue.append(song)
 
             if self.is_playing == False:
                     print('Canzone scaricata: entrato in play')
                     await self.play_music(voiceChannel)
         else :
-            if self.vc.is_paused() is True :
+            if self.vc.is_paused() is True : #TODO problema del mettere in coda
                 print("Resumo") 
                 self.vc.resume()
             else : #TODO mettere in lista in caso positivo
-                return
+                self.music_queue.append(song)
             
                 
                     
-
+    #skippa la song a quella successiva, nel mentrew handla il boolean isplaying
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self,ctx):
         if self.vc != "" and self.vc:
@@ -126,9 +124,10 @@ class music_cog(commands.Cog):
             await self.play_music(self.vc.channel)
     
 
-    @commands.command(name="stop", help="skippa la canzone bro")
-    async def stop(self,ctx):
+    @commands.command(name="pause", help="skippa la canzone bro")
+    async def pause(self,ctx):
         if self.is_playing == True:
+            await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
             self.vc.pause()
 
