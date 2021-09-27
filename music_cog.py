@@ -21,13 +21,6 @@ class music_cog(commands.Cog):
         self.music_queue = []
         self.vc = ""  # voice channel
 
-    def search_yt(self, item):
-        video = pafy.new(item)
-        print(video.rating)
-        best = video.getbest()
-        filename = best.download("./assets/songs")
-        return video.title
-
     def youtube_dl_search(self,query):
         ydl_opts = {'format': 'bestaudio/best',
                     # if they setn a playlist it would not consider it? #TODO study the behaviour
