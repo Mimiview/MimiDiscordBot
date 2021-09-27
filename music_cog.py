@@ -23,12 +23,13 @@ class music_cog(commands.Cog):
         filename = best.download("./assets/songs")
         return video.title
 
-    def youtube_dl_search():
+    def youtube_dl_search(self,query):
         ydl_opts = {'format': 'bestaudio/best',
                     # if they setn a playlist it would not consider it? #TODO study the behaviour
                     'noplaylist': True,
                     # location where ffmep is situated
                     'ffmpeg_location': 'C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe',
+                    'default_search' : 'auto', #TODO osservare come cercare senza url
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
@@ -38,7 +39,7 @@ class music_cog(commands.Cog):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(
-                'https://www.youtube.com/watch?v=V2mnB2gYEMs&ab_channel=Rondodasosa', download=True)
+                query, download=True)
         return [meta.get('title', None)] #TODO back-end handling
 
     async def play_music(self,channel):
@@ -63,7 +64,7 @@ class music_cog(commands.Cog):
             print('Poppato dalla lista'+self.music_queue.pop(0))
             #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
-                         source='./assets/songs/'+nomeSong+'.mp4'))
+                         source='./assets/songs/'+nomeSong+'.mp3'))
                # osservare il metodo play
 
 
@@ -87,9 +88,15 @@ class music_cog(commands.Cog):
         if voiceChannel is None:
             await ctx.send("Entra in un cazzo di canale fra!")
             return
-        if self.vc.is_playing == False:
-            song = self.search_yt(query)
+        if self.is_playing == False :
+            try :
+                song = self.youtube_dl_search(query)[0]
+            except: 
+                await ctx.send("Chicco mettime un link valido o ti pisto")
+                return
+
             if type(song) is None:
+                print(type(song)+"HGWOEOWOEOOEOWEOEOWOEO")
                 await ctx.send("Chicco mettime un link valido o ti pisto")
                 return
             else:
@@ -103,17 +110,21 @@ class music_cog(commands.Cog):
             if self.vc.is_paused() is True :
                 print("Resumo") 
                 self.vc.resume()
-            else : return
+            else : #TODO mettere in lista in caso positivo
+                return
             
                 
                     
 
     @commands.command(name="skip", help="skippa la canzone bro")
-    async def skip(self):
+    async def skip(self,ctx):
         if self.vc != "" and self.vc:
             self.vc.stop()
+            self.is_playing = False
+            await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
             await self.play_music(self.vc.channel)
+    
 
     @commands.command(name="stop", help="skippa la canzone bro")
     async def stop(self,ctx):
