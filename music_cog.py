@@ -6,7 +6,7 @@ import time
 import youtube_dl
 
 from youtube_dl import YoutubeDL
-
+#Ricorda di installare PyNaCl
 
 class music_cog(commands.Cog):
     def __init__(self, bot):
@@ -29,7 +29,7 @@ class music_cog(commands.Cog):
                     'noplaylist': True,
                     # location where ffmep is situated
                     'ffmpeg_location': 'C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe',
-                    'default_search' : 'auto', #TODO osservare come cercare senza url
+                    #'default_search' : 'auto', #TODO osservare come cercare senza url
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
