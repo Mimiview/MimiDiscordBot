@@ -109,9 +109,7 @@ class music_cog(commands.Cog):
                 print("Resumo") 
                 self.vc.resume()
             else : #TODO mettere in lista in caso positivo
-                self.music_queue.append(song)
-            
-                
+                return   
                     
     #skippa la song a quella successiva, nel mentrew handla il boolean isplaying
     @commands.command(name="skip", help="skippa la canzone bro")
@@ -130,6 +128,12 @@ class music_cog(commands.Cog):
             await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
             self.vc.pause()
-
+    #printa su discord la coda di canzoni
+    @commands.command(name="queue", help="skippa la canzone bro")
+    async def queue(self,ctx):
+        r = ' Coda in attesa: \n'
+        for i in self.music_queue : 
+            r += i +'\n'
+        await ctx.send(r)
     
 
