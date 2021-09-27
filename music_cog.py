@@ -32,7 +32,7 @@ class music_cog(commands.Cog):
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
-                        'preferredquality': '128',
+                        'preferredquality': '192',
                     }],
                     'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path
 
@@ -42,36 +42,41 @@ class music_cog(commands.Cog):
         return [meta.get('title', None)] #TODO back-end handling
 
     async def play_music(self,channel):
+        print('Canzoni in coda: ',len(self.music_queue))
         if len(self.music_queue) > 0:
             self.is_playing = True
 
             # prendi l'url del primo
             nomeSong = self.music_queue[0]
+            #TODO vedere se una canzone è in stop
 
             #  questo mi connette il bot al voicechannel corrente
+            #TODO vedere se connetterlo al di fuori(ossia nella play) per poi provare a poter fare il resume
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
                 self.vc = await channel.connect()
+                print('Entrato nel Canale',channel)
             else:
                 # TODO da vedere se si sposta o meno
                 await self.vc.move_to(channel)
+            print('Verificata la connessione')
 
-            self.music_queue.pop(0)
-
+            print('Poppato dalla lista'+self.music_queue.pop(0))
             #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
             self.vc.play(discord.FFmpegPCMAudio(executable="C:/Ffmpeg/ffmpeg/bin/ffmpeg.exe",
                          source='./assets/songs/'+nomeSong+'.mp4'))
-            print("Current Playing: "+nomeSong)   # osservare il metodo play
+               # osservare il metodo play
 
+
+            if self.vc.is_playing() is True: 
+                print("Current Playing: "+nomeSong)
+            else : 
+                print("Non playa più la song: "+nomeSong)
             # mi contrtolla costantemente se una canzone è in playing
-            while self.vc.is_playing():
-                time.sleep(3)
+            
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
-            await self.play_music(channel)
+            
 
-        else:
-            self.is_playing = False
-            if self.vc.is_connected():
-                self.vc.disconnect()
+        
 
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
@@ -81,25 +86,40 @@ class music_cog(commands.Cog):
 
         if voiceChannel is None:
             await ctx.send("Entra in un cazzo di canale fra!")
-        else:
+            return
+        if self.vc.is_playing == False:
             song = self.search_yt(query)
             if type(song) is None:
                 await ctx.send("Chicco mettime un link valido o ti pisto")
+                return
             else:
-                await ctx.send("Provvederò a sburare un pochino di musica")
+                await ctx.send("Pompo un pochino di "+song)
                 self.music_queue.append(song)
-                if self.is_playing == False:
+
+            if self.is_playing == False:
+                    print('Canzone scaricata: entrato in play')
                     await self.play_music(voiceChannel)
+        else :
+            if self.vc.is_paused() is True :
+                print("Resumo") 
+                self.vc.resume()
+            else : return
+            
+                
+                    
 
     @commands.command(name="skip", help="skippa la canzone bro")
-    async def skip(self, ctx):
+    async def skip(self):
         if self.vc != "" and self.vc:
             self.vc.stop()
             print("Stoppato e skippato")
             await self.play_music(self.vc.channel)
 
     @commands.command(name="stop", help="skippa la canzone bro")
-    async def stop(self):
+    async def stop(self,ctx):
         if self.is_playing == True:
             print("Stoppa ziooo")
-            self.vc.stop()
+            self.vc.pause()
+
+    
+
