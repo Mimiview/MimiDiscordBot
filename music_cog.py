@@ -36,9 +36,8 @@ class music_cog(commands.Cog):
                     'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            meta = ydl.extract_info(
-                query, download=True)
-        return [meta.get('title', None)] #TODO back-end handling
+            meta = ydl.extract_info(query, download=False)
+            return meta['formats'][0]['url'] 
 
     async def play_music(self,channel):
         print('Canzoni in coda: ',len(self.music_queue))
@@ -46,7 +45,7 @@ class music_cog(commands.Cog):
             self.is_playing = True
 
             # prendi l'url del primo
-            nomeSong = self.music_queue[0]
+            song = self.music_queue[0]
             #TODO vedere se una canzone è in stop
 
             #  questo mi connette il bot al voicechannel corrente
@@ -61,15 +60,14 @@ class music_cog(commands.Cog):
 
             print('Poppato dalla lista'+self.music_queue.pop(0))
             #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
-            self.vc.play(discord.FFmpegPCMAudio(executable=os.getenv('FFMPEG_PATH'),
-                         source='./assets/songs/'+nomeSong+'.mp3'))
+            self.vc.play(discord.FFmpegOpusAudio(song)) # TODO vedere cosa bisogna mettere come input
                # osservare il metodo play
 
 
             if self.vc.is_playing() is True: 
-                print("Current Playing: "+nomeSong)
+                print("Current Playing: ")
             else : 
-                print("Non playa più la song: "+nomeSong)
+                print("Non playa più la song: ")
 
       
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
@@ -91,7 +89,7 @@ class music_cog(commands.Cog):
             
         if self.is_playing == False :
             try :
-                song = self.youtube_dl_search(query)[0]
+                song = self.youtube_dl_search(query)
             except: 
                 await ctx.send("Chicco mettime un link valido o ti pisto")
                 return
