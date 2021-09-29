@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 from youtube_dl import YoutubeDL
-#Ricorda di installare PyNaCl
+# Ricorda di installare PyNaCl
 
 load_dotenv('.env')
 
@@ -21,7 +21,7 @@ class music_cog(commands.Cog):
         self.music_queue = []
         self.vc = ""  # voice channel
 
-    def youtube_dl_search(self,query):
+    def youtube_dl_search(self, query):
         ydl_opts = {'format': 'bestaudio/best',
                     # if they setn a playlist it would not consider it? #TODO study the behaviour
                     'noplaylist': True,
@@ -33,103 +33,94 @@ class music_cog(commands.Cog):
                         'preferredcodec': 'mp3',
                         'preferredquality': '192',
                     }],
-                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path
+                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path deprecato da me, non esiste piu il download pappapero
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
-            return meta['formats'][0]['url'] 
+            return [meta.get('url', None), meta.get('title', None)]
 
-    async def play_music(self,channel):
-        print('Canzoni in coda: ',len(self.music_queue))
+    async def play_music(self, channel):
+        print('Canzoni in coda: ', len(self.music_queue))
         if len(self.music_queue) > 0:
             self.is_playing = True
 
             # prendi l'url del primo
             song = self.music_queue[0]
-            #TODO vedere se una canzone è in stop
-
-            #  questo mi connette il bot al voicechannel corrente
-            #TODO vedere se connetterlo al di fuori(ossia nella play) per poi provare a poter fare il resume
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
                 self.vc = await channel.connect()
-                print('Entrato nel Canale',channel)
+                print('Entrato nel Canale', channel)
             else:
                 # TODO da vedere se si sposta o meno
                 await self.vc.move_to(channel)
-            print('Verificata la connessione')
+            print('Verificata la connessione'+'\n')
 
-            print('Poppato dalla lista'+self.music_queue.pop(0))
-            #TODO vedere la lambda se funziona o meno e estudioia, vedere se è possibile non downloadare
-            self.vc.play(discord.FFmpegOpusAudio(song)) # TODO vedere cosa bisogna mettere come input
-               # osservare il metodo play
+            print('Poppato dalla lista'+self.music_queue.pop(0)[1]+'\n')
+            self.vc.play(discord.FFmpegOpusAudio(
+                song[0], executable=os.getenv('FFMPEG_PATH')))
+            # da vedere che bug potrebbe portare
+            print("Current Playing: " + song[1]+'\n')
+            while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra
+                time.sleep(1)
 
+            self.is_playing = False
+            await self.play_music(channel)
+        else:
+            print("non ci sono canzoni in lista\n")
 
-            if self.vc.is_playing() is True: 
-                print("Current Playing: ")
-            else : 
-                print("Non playa più la song: ")
-
-      
             # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
-            
-
-        
 
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
         query = " ".join(args)
 
-        try : 
+        try:
             voiceChannel = ctx.author.voice.channel
-        except : 
+        except:
             await ctx.send("Entra in un cazzo di canale fra!")
             return
 
-        
-            
-        if self.is_playing == False :
-            try :
-                song = self.youtube_dl_search(query)
-            except: 
-                await ctx.send("Chicco mettime un link valido o ti pisto")
-                return
+        try:
+            song = self.youtube_dl_search(query)
+        except:
+            await ctx.send("Chicco mettime un link valido o ti pisto")
+            return
+        self.music_queue.append(song)
+        print('Canzone scaricata: entrato in play')
 
-            await ctx.send("Pompo un pochino di "+song)
-            self.music_queue.append(song)
+        if self.is_playing == False:
 
-            if self.is_playing == False:
-                    print('Canzone scaricata: entrato in play')
-                    await self.play_music(voiceChannel)
-        else :
-            if self.vc.is_paused() is True : #TODO problema del mettere in coda
-                print("Resumo") 
+            await ctx.send("Pompo un pochino di "+song[1])
+            await self.play_music(voiceChannel)
+
+        else:
+            if self.vc.is_paused() is True:  # TODO problema del mettere in coda
+                print("Resumo")
                 self.vc.resume()
-            else : #TODO mettere in lista in caso positivo
-                return   
-                    
-    #skippa la song a quella successiva, nel mentrew handla il boolean isplaying
+            else:  # TODO mettere in lista in caso positivo
+                self.music_queue.append(song)
+                await ctx.send("Canzone messa in cosa" + song[1])
+                # skippa la song a quella successiva, nel mentrew handla il boolean isplaying
+
     @commands.command(name="skip", help="skippa la canzone bro")
-    async def skip(self,ctx):
+    async def skip(self, ctx):
         if self.vc != "" and self.vc:
             self.vc.stop()
             self.is_playing = False
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
             await self.play_music(self.vc.channel)
-    
 
-    @commands.command(name="pause", help="skippa la canzone bro")
-    async def pause(self,ctx):
+    @commands.command(name="pause", help="mettinpausa")
+    async def pause(self, ctx):
         if self.is_playing == True:
             await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
             self.vc.pause()
-    #printa su discord la coda di canzoni
-    @commands.command(name="queue", help="skippa la canzone bro")
-    async def queue(self,ctx):
-        r = ' Coda in attesa: \n'
-        for i in self.music_queue : 
-            r += i +'\n'
-        await ctx.send(r)
-    
+    # printa su discord la coda di canzoni
 
+    @commands.command(name="queue", help="la lista delle song")
+    async def queue(self, ctx):
+        r = ' Coda in attesa: \n'
+        for i in self.music_queue:
+            r += i[1] + '\n'
+        await ctx.send(r)
