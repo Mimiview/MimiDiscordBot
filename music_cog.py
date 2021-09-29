@@ -108,6 +108,7 @@ class music_cog(commands.Cog):
             self.is_playing = False
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
+            
             await self.play_music(self.vc.channel)
 
     @commands.command(name="pause", help="mettinpausa")
