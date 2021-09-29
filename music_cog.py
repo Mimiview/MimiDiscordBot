@@ -27,7 +27,7 @@ class music_cog(commands.Cog):
                     'noplaylist': True,
                     # location where ffmep is situated
                     'ffmpeg_location': os.getenv('FFMPEG_PATH'),
-                    #'default_search' : 'auto', #TODO osservare come cercare senza url
+                    # 'default_search' : 'auto', #TODO osservare come cercare senza url
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
@@ -37,7 +37,8 @@ class music_cog(commands.Cog):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
-            return [meta.get('url', None), meta.get('title', None)] #ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
+            # ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
+            return [meta.get('url', None), meta.get('title', None)]
 
     async def play_music(self, channel):
         print('Canzoni in coda: ', len(self.music_queue))
@@ -59,7 +60,7 @@ class music_cog(commands.Cog):
                 song[0], executable=os.getenv('FFMPEG_PATH')))
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
-            while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra
+            while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
                 time.sleep(1)
 
             self.is_playing = False
@@ -106,7 +107,8 @@ class music_cog(commands.Cog):
         if self.vc != "" and self.vc:
             self.vc.stop()
             self.is_playing = False
-            await ctx.send("Canzone Skippata") #capire per quale motivo stampa due volte questo send
+            # capire per quale motivo stampa due volte questo send
+            await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
             await self.play_music(self.vc.channel)
 
@@ -124,3 +126,9 @@ class music_cog(commands.Cog):
         for i in self.music_queue:
             r += i[1] + '\n'
         await ctx.send(r)
+
+    @commands.command(name="stop", help="stoppa la song xd")
+    async def stop(self, ctx):
+        if self.is_playing == True:  # in futuro vedere se serve ciò o altro
+            self.vc.stop()
+            await ctx.send("Stoppiamo la musica diocan")
