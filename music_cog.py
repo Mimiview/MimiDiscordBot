@@ -37,7 +37,7 @@ class music_cog(commands.Cog):
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
-            return [meta.get('url', None), meta.get('title', None)]
+            return [meta.get('url', None), meta.get('title', None)] #ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
 
     async def play_music(self, channel):
         print('Canzoni in coda: ', len(self.music_queue))
@@ -106,9 +106,8 @@ class music_cog(commands.Cog):
         if self.vc != "" and self.vc:
             self.vc.stop()
             self.is_playing = False
-            await ctx.send("Canzone Skippata")
+            await ctx.send("Canzone Skippata") #capire per quale motivo stampa due volte questo send
             print("Stoppato e skippato")
-            
             await self.play_music(self.vc.channel)
 
     @commands.command(name="pause", help="mettinpausa")
