@@ -115,7 +115,7 @@ class music_cog(commands.Cog):
             await self.play_music(self.vc.channel)
 
     @commands.command(name="stop", help="mettinpausa")
-    async def stop(self, ctx):
+    async def stop(self, ctx): #Lo stop mette semplicemente in pausa 
         if self.is_playing == True:
             await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
@@ -131,13 +131,12 @@ class music_cog(commands.Cog):
 
     @commands.command(name="resume", help="rimette in play una canzone")
     async def resume(self, ctx):
-        if (self.is_playing and self.vc.is_paused()) or (self.vc.is_paused() and len(self.music_queue)>0):
+        if self.is_playing and self.vc.is_paused():  # TODO la seconda è inutile, vedere come far a vedere
             print("Resumo")
             self.vc.resume()
+            return
+        if self.is_playing == False and len(self.music_queue) > 0: #TODO Inutile perchè quando finisce una canzone, l'is_playing non ritorna a false, bisogna vedere come far andare in automatico la coda
+            print("Provato a resumere")
+            self.play_music()
 
-    @commands.command(name="stop", help="stoppa la song xd")
-    async def stop(self, ctx):
-        if self.is_playing == True:  # in futuro vedere se serve ciò o altro
-            self.vc.stop()
-            self.is_playing = False
-            await ctx.send("Stoppiamo la musica diocan")
+    
