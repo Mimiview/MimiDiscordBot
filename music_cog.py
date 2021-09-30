@@ -40,13 +40,25 @@ class music_cog(commands.Cog):
             # ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
             return [meta.get('url', None), meta.get('title', None)]
 
+    async def play_next(self):
+        if len(self.music_queue) > 0:
+            self.is_playing = True
+            song = self.music_queue.pop(0)
+            self.vc.play(discord.FFmpegOpusAudio(
+                song[0], executable=os.getenv('FFMPEG_PATH')))
+            # da vedere che bug potrebbe portare
+            print("Current Playing: " + song[1]+'\n')
+        else:
+            self.is_playing = False
+
     async def play_music(self, channel):
         print('Canzoni in coda: ', len(self.music_queue))
         if len(self.music_queue) > 0:
             self.is_playing = True
 
             # prendi l'url del primo
-            song = self.music_queue[0]
+            song = self.music_queue.pop(0)
+            print('Poppato dalla lista'+song[1]+'\n')
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
                 self.vc = await channel.connect()
                 print('Entrato nel Canale', channel)
@@ -55,20 +67,17 @@ class music_cog(commands.Cog):
                 await self.vc.move_to(channel)
             print('Verificata la connessione'+'\n')
 
-            print('Poppato dalla lista'+self.music_queue.pop(0)[1]+'\n')
             self.vc.play(discord.FFmpegOpusAudio(
                 song[0], executable=os.getenv('FFMPEG_PATH')))
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
-            while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
-                time.sleep(1)
-
-            self.is_playing = False
-            await self.play_music(channel)
+            # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
+            #    time.sleep(1)
         else:
+            self.is_playing = False
             print("non ci sono canzoni in lista\n")
 
-            # TODO devi cercare di capire in che modo far waitare e farlo funzionare bro
+    
 
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
@@ -94,13 +103,8 @@ class music_cog(commands.Cog):
             await self.play_music(voiceChannel)
 
         else:
-            if self.vc.is_paused() is True:  # TODO problema del mettere in coda
-                print("Resumo")
-                self.vc.resume()
-            else:  # TODO mettere in lista in caso positivo
-                self.music_queue.append(song)
-                await ctx.send("Canzone messa in cosa" + song[1])
-                # skippa la song a quella successiva, nel mentrew handla il boolean isplaying
+            await ctx.send("Canzone messa in coda " + song[1])
+            # skippa la song a quella successiva, nel mentrew handla il boolean isplaying
 
     @commands.command(name="skip", help="skippa la canzone bro")
     async def skip(self, ctx):
@@ -112,8 +116,8 @@ class music_cog(commands.Cog):
             print("Stoppato e skippato")
             await self.play_music(self.vc.channel)
 
-    @commands.command(name="pause", help="mettinpausa")
-    async def pause(self, ctx):
+    @commands.command(name="stop", help="mettinpausa")
+    async def stop(self, ctx):
         if self.is_playing == True:
             await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
@@ -127,8 +131,15 @@ class music_cog(commands.Cog):
             r += i[1] + '\n'
         await ctx.send(r)
 
+    @commands.command(name="resume", help="rimette in play una canzone")
+    async def resume(self, ctx):
+        if self.is_playing and self.vc.is_paused():
+            print("Resumo")
+            self.vc.resume()
+
     @commands.command(name="stop", help="stoppa la song xd")
     async def stop(self, ctx):
         if self.is_playing == True:  # in futuro vedere se serve ciò o altro
             self.vc.stop()
+            self.is_playing = False
             await ctx.send("Stoppiamo la musica diocan")
