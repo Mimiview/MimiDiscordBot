@@ -77,8 +77,6 @@ class music_cog(commands.Cog):
             self.is_playing = False
             print("non ci sono canzoni in lista\n")
 
-    
-
     @commands.command(name="play", help="Plays a selected song from youtube")
     async def play(self, ctx, *args):
         query = " ".join(args)
@@ -133,7 +131,7 @@ class music_cog(commands.Cog):
 
     @commands.command(name="resume", help="rimette in play una canzone")
     async def resume(self, ctx):
-        if self.is_playing and self.vc.is_paused():
+        if (self.is_playing and self.vc.is_paused()) or (self.vc.is_paused() and len(self.music_queue)>0):
             print("Resumo")
             self.vc.resume()
 
