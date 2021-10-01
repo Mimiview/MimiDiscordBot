@@ -4,7 +4,8 @@ This is a simple discord music bot that downloads the song thanks the yt-url of 
 
 # Requisites
 * Python [3.6+](https://www.python.org/downloads/)
-* ffmpeg [installed](https://ffmpeg.org/download.html) 
+* ffmpeg [installed](https://ffmpeg.org/download.html)
+* Discord [Bot](https://discord.com/developers/applications)
 
 # Setup
 
@@ -39,3 +40,14 @@ venv\Scripts\activate
 ```
 (venv) .\bot.py
 ```
+
+# Usage 
+
+After you get into your discord [application](https://discord.com/developers/applications), go on the OAuth2 section, scrool down and tick the bot *scope*, add the permission of voice texting and whatever you want, paste the link shown and get your bot into your server.
+
+When you'll run the bot you can type all the command which the bot has: 
+* `-play [url] : You must give a Youtube *url* to that`
+* `-queue : It shows you the song queue`
+* `-skip : Skip the song`
+* `-stop : Pause the song`
+* `-resume : It resumes the song`
