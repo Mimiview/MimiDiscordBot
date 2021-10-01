@@ -26,7 +26,7 @@ git clone https://github.com/Mimiview/MimiDiscordBot.git
 * Make a virtualenv running this code and activate it
 ```
 virtualenv venv
-venv\Scripts|activate
+venv\Scripts\activate
 ```
 * Install with `pip` command all the libraries we need for 
 ```
