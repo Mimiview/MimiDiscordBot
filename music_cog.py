@@ -40,12 +40,12 @@ class music_cog(commands.Cog):
             # ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
             return [meta.get('url', None), meta.get('title', None)]
 
-    async def play_next(self):
+    def play_next(self):
         if len(self.music_queue) > 0:
             self.is_playing = True
             song = self.music_queue.pop(0)
             self.vc.play(discord.FFmpegOpusAudio(
-                song[0], executable=os.getenv('FFMPEG_PATH')))
+                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e: self.play_next())
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
         else:
@@ -68,7 +68,7 @@ class music_cog(commands.Cog):
             print('Verificata la connessione'+'\n')
 
             self.vc.play(discord.FFmpegOpusAudio(
-                song[0], executable=os.getenv('FFMPEG_PATH')))
+                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e : self.play_next())
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
             # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
@@ -97,10 +97,11 @@ class music_cog(commands.Cog):
 
         if self.is_playing == False:
 
-            await ctx.send("Pompo un pochino di "+song[1])
+            await ctx.send("Pompo un pochino di "+song[1]+'\n')
             await self.play_music(voiceChannel)
 
         else:
+            print("Canzone accodata "+song[1]+'\n')
             await ctx.send("Canzone messa in coda " + song[1])
             # skippa la song a quella successiva, nel mentrew handla il boolean isplaying
 
@@ -126,7 +127,7 @@ class music_cog(commands.Cog):
     async def queue(self, ctx):
         r = ' Coda in attesa: \n'
         for i in self.music_queue:
-            r += i[1] + '\n'
+            r += '-'+ i[1] + '\n'
         await ctx.send(r)
 
     @commands.command(name="resume", help="rimette in play una canzone")
@@ -134,9 +135,6 @@ class music_cog(commands.Cog):
         if self.is_playing and self.vc.is_paused():  # TODO la seconda è inutile, vedere come far a vedere
             print("Resumo")
             self.vc.resume()
-            return
-        if self.is_playing == False and len(self.music_queue) > 0: #TODO Inutile perchè quando finisce una canzone, l'is_playing non ritorna a false, bisogna vedere come far andare in automatico la coda
-            print("Provato a resumere")
-            self.play_music()
 
+        
     
