@@ -6,11 +6,14 @@ import time
 import youtube_dl
 import os
 from dotenv import load_dotenv
+from sty import bg, ef, fg, rs
 
 from youtube_dl import YoutubeDL
 # Ricorda di installare PyNaCl
 
 load_dotenv('.env')
+
+#TODO fixare il fatto che se disconnetto il bot di proposito, me lo da come connesso ancora studiare comportamento
 
 
 class music_cog(commands.Cog):
@@ -93,7 +96,7 @@ class music_cog(commands.Cog):
             await ctx.send("Chicco mettime un link valido o ti pisto")
             return
         self.music_queue.append(song)
-        print('Canzone scaricata: entrato in play')
+        print(fg.green+'Canzone scaricata: entrato in play'+fg.rs) #need to 
 
         if self.is_playing == False:
 
@@ -125,9 +128,10 @@ class music_cog(commands.Cog):
 
     @commands.command(name="queue", help="la lista delle song")
     async def queue(self, ctx):
-        r = ' Coda in attesa: \n'
+        print("Lista stampata"+'\n')
+        r = ' Playlist: \n'
         for i in self.music_queue:
-            r += '-'+ i[1] + '\n'
+            r += '  - '+ i[1] + '\n'
         await ctx.send(r)
 
     @commands.command(name="resume", help="rimette in play una canzone")
