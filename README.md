@@ -2,12 +2,12 @@
 
 This is a simple discord music bot that downloads the song thanks the yt-url of it.
 
-# Requisites
+## Requisites
 * Python [3.6+](https://www.python.org/downloads/)
 * ffmpeg [installed](https://ffmpeg.org/download.html)
 * Discord [Bot](https://discord.com/developers/applications)
 
-# Setup
+## Setup
 
 * Install Python [3.6+](https://www.python.org/downloads/)
 
@@ -41,7 +41,7 @@ venv\Scripts\activate
 (venv) .\bot.py
 ```
 
-# Usage 
+## Usage 
 
 After you get into your discord [application](https://discord.com/developers/applications), go on the OAuth2 section, scrool down and tick the bot *scope*, add the permission of voice texting and whatever you want, paste the link shown and get your bot into your server.
 
