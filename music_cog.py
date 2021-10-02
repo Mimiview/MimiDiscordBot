@@ -42,6 +42,7 @@ class music_cog(commands.Cog):
             return [meta.get('url', None), meta.get('title', None)]
 
     def play_next(self):
+        print('Canzoni in coda: ', len(self.music_queue))
         if len(self.music_queue) > 0:
             self.is_playing = True
             song = self.music_queue.pop(0)
@@ -113,7 +114,7 @@ class music_cog(commands.Cog):
             self.vc.stop()
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
-            self.play_next() #TODO vedere perchè da clientException
+            self.play_next() #TODO vedere perchè da clientException, capire perchè skippa due volte
             
             
 
