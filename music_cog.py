@@ -1,8 +1,6 @@
 import discord
-import pafy
 from discord.channel import VoiceChannel
 from discord.ext import commands
-import time
 import youtube_dl
 import os
 from dotenv import load_dotenv
@@ -66,12 +64,13 @@ class music_cog(commands.Cog):
                 self.vc = await channel.connect()
                 print('Entrato nel Canale', channel)
             else:
-                # TODO da vedere se si sposta o meno
-                await self.vc.move_to(channel)
+                    print("Move to channel")
+                    await self.vc.move_to(channel)
+
             print('Verificata la connessione'+'\n')
 
             self.vc.play(discord.FFmpegOpusAudio(
-                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e : self.play_next())
+                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e : self.play_next()) #TODO se vai troppo fast devi vedere in che modo sloware la richiesta
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
             # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
@@ -96,7 +95,7 @@ class music_cog(commands.Cog):
             await ctx.send("Chicco mettime un link valido o ti pisto")
             return
         self.music_queue.append(song)
-        print(fg.green+'Canzone scaricata: entrato in play'+fg.rs) #need to 
+        print('Canzone scaricata: entrato in play') #need to 
 
         if self.is_playing == False:
 
@@ -112,11 +111,11 @@ class music_cog(commands.Cog):
     async def skip(self, ctx):
         if self.vc != "" and self.vc:
             self.vc.stop()
-            self.is_playing = False
-            # capire per quale motivo stampa due volte questo send
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
-            await self.play_music(self.vc.channel)
+            self.play_next() #TODO vedere perchè da clientException
+            
+            
 
     @commands.command(name="stop", help="mettinpausa")
     async def stop(self, ctx): #Lo stop mette semplicemente in pausa 
