@@ -60,7 +60,7 @@ class music_cog(commands.Cog):
 
             # prendi l'url del primo
             song = self.music_queue.pop(0)
-            #print('Poppato dalla lista'+song[1]+'\n')
+            print('Poppato dalla lista'+song[1]+'\n')
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
                 self.vc = await channel.connect()
                 print('Entrato nel Canale', channel)
@@ -72,10 +72,9 @@ class music_cog(commands.Cog):
 
             self.vc.play(discord.FFmpegOpusAudio(
                 song[0], executable=os.getenv('FFMPEG_PATH')), after=lambda e: self.play_next())  # TODO se vai troppo fast devi vedere in che modo sloware la richiesta
-            # da vedere che bug potrebbe portare
-            #print("Current Playing: " + song[1]+'\n')
-            # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
-            #    time.sleep(1)
+           
+            print("Current Playing: " + song[1]+'\n')
+            
         else:
             self.is_playing = False
             print("non ci sono canzoni in lista\n")
@@ -99,8 +98,7 @@ class music_cog(commands.Cog):
         print('Canzone scaricata: entrato in play')  # need to
 
         if self.is_playing == False:
-
-            # await ctx.send("Pompo un pochino di "+song[1]+'\n')
+            await ctx.send("Pompo un pochino di "+song[1]+'\n')
             await self.play_music(voiceChannel)
 
         else:
