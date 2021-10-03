@@ -33,12 +33,13 @@ class music_cog(commands.Cog):
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
                         'preferredquality': '192',
-                    }]} 
+                    }]}
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
             # ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
-            return [meta.get('url', None), meta.get('title', None)]
+            
+            return [meta['entries'][0]['url'], meta['entries'][0]['title']] #dictionary con 3 layers
 
     def play_next(self):
         print('Canzoni in coda: ', len(self.music_queue))
@@ -59,7 +60,7 @@ class music_cog(commands.Cog):
 
             # prendi l'url del primo
             song = self.music_queue.pop(0)
-            print('Poppato dalla lista'+song[1]+'\n')
+            #print('Poppato dalla lista'+song[1]+'\n')
             if self.vc == "" or not self.vc.is_connected() or self.vc == None:
                 self.vc = await channel.connect()
                 print('Entrato nel Canale', channel)
@@ -72,7 +73,7 @@ class music_cog(commands.Cog):
             self.vc.play(discord.FFmpegOpusAudio(
                 song[0], executable=os.getenv('FFMPEG_PATH')), after=lambda e: self.play_next())  # TODO se vai troppo fast devi vedere in che modo sloware la richiesta
             # da vedere che bug potrebbe portare
-            print("Current Playing: " + song[1]+'\n')
+            #print("Current Playing: " + song[1]+'\n')
             # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
             #    time.sleep(1)
         else:
@@ -99,7 +100,7 @@ class music_cog(commands.Cog):
 
         if self.is_playing == False:
 
-            await ctx.send("Pompo un pochino di "+song[1]+'\n')
+            # await ctx.send("Pompo un pochino di "+song[1]+'\n')
             await self.play_music(voiceChannel)
 
         else:
