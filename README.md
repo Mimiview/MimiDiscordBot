@@ -1,6 +1,6 @@
 # MimiDiscordBot
 
-This is a simple discord music bot that downloads the song thanks the yt-url of it.
+This is a simple discord music bot that downloads the song using discrord messages.
 
 ## Requisites
 * Python [3.6+](https://www.python.org/downloads/)
