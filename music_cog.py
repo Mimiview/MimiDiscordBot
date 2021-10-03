@@ -11,7 +11,7 @@ from youtube_dl import YoutubeDL
 
 load_dotenv('.env')
 
-#TODO fixare il fatto che se disconnetto il bot di proposito, me lo da come connesso ancora studiare comportamento
+# TODO fixare il fatto che se disconnetto il bot di proposito, me lo da come connesso ancora studiare comportamento
 
 
 class music_cog(commands.Cog):
@@ -23,18 +23,17 @@ class music_cog(commands.Cog):
         self.vc = ""  # voice channel
 
     def youtube_dl_search(self, query):
-        ydl_opts = {'format': 'bestaudio/best',
+        ydl_opts = {'format': 'bestaudio',
                     # if they setn a playlist it would not consider it? #TODO study the behaviour
                     'noplaylist': True,
                     # location where ffmep is situated
                     'ffmpeg_location': os.getenv('FFMPEG_PATH'),
-                    # 'default_search' : 'auto', #TODO osservare come cercare senza url
+                    'default_search': 'ytsearch',  # TODO osservare come cercare senza url
                     'postprocessors': [{  # postprocess options
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
                         'preferredquality': '192',
-                    }],
-                    'outtmpl': './assets/songs/%(title)s.%(ext)s'}  # output path deprecato da me, non esiste piu il download pappapero
+                    }]} 
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
@@ -47,7 +46,7 @@ class music_cog(commands.Cog):
             self.is_playing = True
             song = self.music_queue.pop(0)
             self.vc.play(discord.FFmpegOpusAudio(
-                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e: self.play_next())
+                song[0], executable=os.getenv('FFMPEG_PATH')), after=lambda e: self.play_next())
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
         else:
@@ -65,13 +64,13 @@ class music_cog(commands.Cog):
                 self.vc = await channel.connect()
                 print('Entrato nel Canale', channel)
             else:
-                    print("Move to channel")
-                    await self.vc.move_to(channel)
+                print("Move to channel")
+                await self.vc.move_to(channel)
 
             print('Verificata la connessione'+'\n')
 
             self.vc.play(discord.FFmpegOpusAudio(
-                song[0], executable=os.getenv('FFMPEG_PATH')), after = lambda e : self.play_next()) #TODO se vai troppo fast devi vedere in che modo sloware la richiesta
+                song[0], executable=os.getenv('FFMPEG_PATH')), after=lambda e: self.play_next())  # TODO se vai troppo fast devi vedere in che modo sloware la richiesta
             # da vedere che bug potrebbe portare
             print("Current Playing: " + song[1]+'\n')
             # while self.vc.is_playing() is True:  # TODO trovare un modo come un event listener per quando smette di playare una canzone riparte con un'altra BIG PROBLEMA
@@ -96,7 +95,7 @@ class music_cog(commands.Cog):
             await ctx.send("Chicco mettime un link valido o ti pisto")
             return
         self.music_queue.append(song)
-        print('Canzone scaricata: entrato in play') #need to 
+        print('Canzone scaricata: entrato in play')  # need to
 
         if self.is_playing == False:
 
@@ -114,12 +113,10 @@ class music_cog(commands.Cog):
             self.vc.stop()
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
-            self.play_next() #TODO vedere perchè da clientException, capire perchè skippa due volte
-            
-            
+            self.play_next()  # TODO vedere perchè da clientException, capire perchè skippa due volte
 
     @commands.command(name="stop", help="mettinpausa")
-    async def stop(self, ctx): #Lo stop mette semplicemente in pausa 
+    async def stop(self, ctx):  # Lo stop mette semplicemente in pausa
         if self.is_playing == True:
             await ctx.send("Canzone messa in pausa")
             print("Stoppa ziooo")
@@ -131,7 +128,7 @@ class music_cog(commands.Cog):
         print("Lista stampata"+'\n')
         r = ' Playlist: \n'
         for i in self.music_queue:
-            r += '  - '+ i[1] + '\n'
+            r += '  - ' + i[1] + '\n'
         await ctx.send(r)
 
     @commands.command(name="resume", help="rimette in play una canzone")
@@ -139,6 +136,3 @@ class music_cog(commands.Cog):
         if self.is_playing and self.vc.is_paused():  # TODO la seconda è inutile, vedere come far a vedere
             print("Resumo")
             self.vc.resume()
-
-        
-    
