@@ -4,8 +4,6 @@ from discord.ext import commands
 import youtube_dl
 import os
 from dotenv import load_dotenv
-from sty import bg, ef, fg, rs
-
 from youtube_dl import YoutubeDL
 # Ricorda di installare PyNaCl
 
