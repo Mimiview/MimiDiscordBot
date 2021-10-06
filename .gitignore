@@ -1,3 +1,4 @@
 *.env
 
 *assets/songs
+*__pycache__
