@@ -2,3 +2,4 @@
 
 *assets/songs
 *__pycache__
+*audio_command.py

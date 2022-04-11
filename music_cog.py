@@ -36,8 +36,9 @@ class music_cog(commands.Cog):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             meta = ydl.extract_info(query, download=False)
             # ritornando una lista avreemo in posizione 0 l'url e in posizione 1 il titolo
-            
-            return [meta['entries'][0]['url'], meta['entries'][0]['title']] #dictionary con 3 layers
+
+            # dictionary con 3 layers
+            return [meta['entries'][0]['url'], meta['entries'][0]['title']]
 
     def play_next(self):
         print('Canzoni in coda: ', len(self.music_queue))
@@ -51,28 +52,31 @@ class music_cog(commands.Cog):
         else:
             self.is_playing = False
 
+    async def bot_voice_channel_connector(self, channel):
+        if self.vc == "" or not self.vc.is_connected() or self.vc == None or not self:
+            self.vc = await channel.connect()
+            print('Entrato nel Canale', channel)
+        else:
+            print("Move to channel")
+            await self.vc.move_to(channel)
+
     async def play_music(self, channel):
         print('Canzoni in coda: ', len(self.music_queue))
         if len(self.music_queue) > 0:
             self.is_playing = True
 
+            await self.bot_voice_channel_connector(channel)
             # prendi l'url del primo
             song = self.music_queue.pop(0)
             print('Poppato dalla lista'+song[1]+'\n')
-            if self.vc == "" or not self.vc.is_connected() or self.vc == None:
-                self.vc = await channel.connect()
-                print('Entrato nel Canale', channel)
-            else:
-                print("Move to channel")
-                await self.vc.move_to(channel)
 
             print('Verificata la connessione'+'\n')
 
             self.vc.play(discord.FFmpegOpusAudio(
                 song[0], executable=os.getenv('FFMPEG_PATH')), after=lambda e: self.play_next())  # TODO se vai troppo fast devi vedere in che modo sloware la richiesta
-           
+
             print("Current Playing: " + song[1]+'\n')
-            
+
         else:
             self.is_playing = False
             print("non ci sono canzoni in lista\n")
@@ -86,7 +90,6 @@ class music_cog(commands.Cog):
         except:
             await ctx.send("Entra in un cazzo di canale fra!")
             return
-
         try:
             song = self.youtube_dl_search(query)
         except:
@@ -98,15 +101,20 @@ class music_cog(commands.Cog):
         if self.is_playing == False:
             await ctx.send("Pompo un pochino di "+song[1]+'\n')
             await self.play_music(voiceChannel)
-
         else:
             print("Canzone accodata "+song[1]+'\n')
             await ctx.send("Canzone messa in coda " + song[1])
             # skippa la song a quella successiva, nel mentrew handla il boolean isplaying
 
-    @commands.command(name="skip", help="skippa la canzone bro")
-    async def skip(self, ctx):
+    @commands.command(name="sqhipe", help="skippa la canzone bro")
+    async def sqhipe(self, ctx):
         if self.vc != "" and self.vc:
+            try:
+                voiceChannel = ctx.author.voice.channel
+            except:
+                await ctx.send("Entra in un cazzo di canale fra!")
+                return
+            await self.bot_voice_channel_connector(voiceChannel)
             self.vc.stop()
             await ctx.send("Canzone Skippata")
             print("Stoppato e skippato")
@@ -130,6 +138,12 @@ class music_cog(commands.Cog):
 
     @commands.command(name="resume", help="rimette in play una canzone")
     async def resume(self, ctx):
+        try:
+                voiceChannel = ctx.author.voice.channel
+        except:
+                await ctx.send("Entra in un cazzo di canale fra!")
+                return
+        await self.bot_voice_channel_connector(voiceChannel)
         if self.is_playing and self.vc.is_paused():  # TODO la seconda è inutile, vedere come far a vedere
             print("Resumo")
             self.vc.resume()

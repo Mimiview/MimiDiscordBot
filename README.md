@@ -31,10 +31,8 @@ venv\Scripts\activate
 ```
 * Install with `pip` command all the libraries we need for 
 ```
-(venv) pip install discord
-(venv) pip install youtube_dl
-(venv) pip install python-dotenv
-(venv) pip install pynacl
+(venv) pip install discord youtube_dl python-dotenv pynacl
+
 ```
 * Now enjoy your bot
 ```
@@ -45,7 +43,7 @@ venv\Scripts\activate
 
 After you get into your discord [application](https://discord.com/developers/applications), go on the OAuth2 section, scrool down and tick the bot *scope*, add the permission of voice texting and whatever you want, paste the link shown and get your bot into your server.
 
-When you'll run the bot you can type all the command which the bot has: 
+When you'll run the bot you can use all the commands down below: 
 * `-play [url] : You must give a Youtube *url* to that`
 * `-queue : It shows you the song queue`
 * `-skip : Skip the song`

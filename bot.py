@@ -1,7 +1,6 @@
 import discord 
 from music_cog import music_cog as music
 from discord.ext import commands
-import pafy 
 from dotenv import load_dotenv
 import os
 
@@ -19,5 +18,5 @@ load_dotenv('.env')
 async def on_ready():
     print("Bot is Running...")
 
-bot.run(os.getenv('BOT_TOKEN'))
+bot.run(os.getenv('BOT_TOKEN'));
 
