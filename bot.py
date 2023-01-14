@@ -4,12 +4,11 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import os
 
-bot = commands.Bot(command_prefix='-')
-
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix='-', intents = intents)
   
 bot.remove_command('help')
 bot.load_extension('music_cog')
- 
  
 load_dotenv('.env')
 
@@ -18,4 +17,3 @@ async def on_ready():
     print("Bot is Running...")
 
 bot.run(os.getenv('BOT_TOKEN'));
-
