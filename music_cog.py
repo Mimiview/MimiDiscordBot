@@ -147,3 +147,8 @@ class music_cog(commands.Cog):
         if self.is_playing and self.vc.is_paused():  # TODO la seconda è inutile, vedere come far a vedere
             print("Resumo")
             self.vc.resume()
+
+
+async def setup(bot: commands.Bot):{
+    await bot.add_cog(music_cog(bot))
+}

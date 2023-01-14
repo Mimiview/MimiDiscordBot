@@ -8,8 +8,7 @@ bot = commands.Bot(command_prefix='-')
 
   
 bot.remove_command('help')
-
-bot.add_cog(music(bot))
+bot.load_extension('music_cog')
  
  
 load_dotenv('.env')
